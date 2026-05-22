@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TypeORM JSON API — Interactive Demo</title>
+  <meta name="description" content="A polished, animated GitHub Pages demo for typeorm-json-api." />
+  <style>
+    :root {
+      --black: #0d0d0f;
+      --charcoal: #1c1c20;
+      --graphite: #2f3137;
+      --ash: #a9adb4;
+      --paper: #f5f6f8;
+      --sun: #ffd23f;
+      --amber: #ff9f1c;
+      --orange: #ff6b1a;
+      --text: #f2f2f2;
+      --muted: #c8ccd2;
+      --card: rgba(32, 34, 40, 0.82);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+      --bg-grid: rgba(255, 210, 63, 0.08);
+    }
+
+    html[data-theme="light"] {
+      --text: #1a1b1f;
+      --muted: #4a4f58;
+      --card: rgba(255, 255, 255, 0.9);
+      --card-border: rgba(20, 20, 24, 0.12);
+      --shadow: 0 14px 35px rgba(0, 0, 0, 0.15);
+      --bg-grid: rgba(255, 159, 28, 0.18);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 10%, rgba(255, 107, 26, 0.22), transparent 40%),
+        radial-gradient(circle at 90% 20%, rgba(255, 210, 63, 0.22), transparent 38%),
+        linear-gradient(130deg, var(--black) 0%, var(--charcoal) 45%, var(--graphite) 100%);
+      overflow-x: hidden;
+      transition: background 300ms ease, color 240ms ease;
+    }
+
+    html[data-theme="light"] body {
+      background:
+        radial-gradient(circle at 10% 10%, rgba(255, 107, 26, 0.24), transparent 40%),
+        radial-gradient(circle at 90% 20%, rgba(255, 210, 63, 0.28), transparent 38%),
+        linear-gradient(130deg, #f8f7f2 0%, #ece9df 45%, #d4d7dc 100%);
+    }
+
+    .animated-grid {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(var(--bg-grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+      background-size: 40px 40px;
+      mask-image: radial-gradient(circle at 50% 30%, black, transparent 80%);
+      animation: drift 12s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes drift {
+      from { transform: translate3d(0, 0, 0); }
+      to { transform: translate3d(40px, 40px, 0); }
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: min(1120px, 94vw);
+      margin: 0 auto;
+      padding: 2rem 0 4rem;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .brand {
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--sun);
+      text-shadow: 0 0 30px rgba(255, 210, 63, 0.3);
+    }
+
+    .theme-toggle {
+      border: 1px solid var(--card-border);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 0.5rem 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: transform 180ms ease, background 220ms ease;
+      box-shadow: var(--shadow);
+    }
+    .theme-toggle:hover { transform: translateY(-2px); }
+
+    .hero {
+      border: 1px solid var(--card-border);
+      background: var(--card);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(7px);
+      border-radius: 24px;
+      padding: clamp(1.4rem, 2.8vw, 2.3rem);
+      position: relative;
+      overflow: hidden;
+      animation: floatIn 900ms ease both;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      background: conic-gradient(from 180deg, transparent 0 45%, rgba(255, 210, 63, 0.55) 54%, rgba(255, 107, 26, 0.45) 66%, transparent 74% 100%);
+      filter: blur(18px);
+      opacity: 0.5;
+      z-index: -1;
+      animation: spin 6s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(1turn);} }
+    @keyframes floatIn {
+      from { opacity: 0; transform: translateY(22px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.9rem, 5vw, 3.4rem);
+      line-height: 1.1;
+    }
+    .accent { color: var(--amber); }
+
+    .lede {
+      margin: 1rem 0 1.4rem;
+      color: var(--muted);
+      max-width: 70ch;
+      font-size: clamp(1rem, 1.8vw, 1.1rem);
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0.8rem;
+      margin-top: 1.2rem;
+    }
+
+    .metric {
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      background: linear-gradient(140deg, rgba(255, 159, 28, 0.16), rgba(255, 210, 63, 0.06));
+      padding: 0.9rem;
+      transform: translateY(14px);
+      opacity: 0;
+      animation: rise 700ms ease forwards;
+    }
+    .metric:nth-child(2){ animation-delay: 120ms; }
+    .metric:nth-child(3){ animation-delay: 220ms; }
+    .metric:nth-child(4){ animation-delay: 330ms; }
+
+    @keyframes rise {
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .metric strong { display: block; font-size: 1.2rem; color: var(--sun); }
+
+    .sections {
+      margin-top: 1.4rem;
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    .panel {
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      background: var(--card);
+      padding: 1rem;
+      box-shadow: var(--shadow);
+      transition: transform 220ms ease, border-color 220ms ease;
+    }
+    .panel:hover {
+      transform: translateY(-3px);
+      border-color: rgba(255, 159, 28, 0.5);
+    }
+
+    .panel h3 { margin-top: 0.1rem; }
+    .panel p { color: var(--muted); }
+
+    .chipset { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .chip {
+      border-radius: 999px;
+      padding: 0.34rem 0.65rem;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: #111;
+      background: linear-gradient(120deg, var(--sun), var(--orange));
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      padding: 1.6rem 0 0.6rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .source-link {
+      margin-top: 0.5rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 650;
+      border-bottom: 1px dashed transparent;
+    }
+    .source-link:hover { border-bottom-color: currentColor; }
+
+    .github-icon {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-grid" aria-hidden="true"></div>
+  <main class="container">
+    <div class="topbar">
+      <div class="brand">typeorm-json-api • live demo</div>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle light and dark mode">
+        <span id="themeIcon">🌙</span>
+        <span id="themeText">Dark Mode</span>
+      </button>
+    </div>
+
+    <section class="hero">
+      <h1>Rapid API Delivery With <span class="accent">TypeORM JSON API</span></h1>
+      <p class="lede">
+        A production-grade CRUD scaffolding approach for TypeORM entities, presented in a polished front-end demonstration. Fast setup, clean abstractions, and developer-first architecture.
+      </p>
+
+      <div class="metrics">
+        <div class="metric"><strong>3x Faster</strong>Entity CRUD rollout velocity</div>
+        <div class="metric"><strong>Zero Boilerplate</strong>Convention-based route generation</div>
+        <div class="metric"><strong>Typed + Safe</strong>Entity-driven query handling</div>
+        <div class="metric"><strong>Production Ready</strong>Single-file deployment</div>
+      </div>
+    </section>
+
+    <section class="sections">
+      <article class="panel">
+        <h3>Architecture Highlights</h3>
+        <p>Composable routers, utility-first query parsing, and standardized error handling to keep API behavior deterministic and easy to scale.</p>
+        <div class="chipset">
+          <span class="chip">Router Abstraction</span>
+          <span class="chip">Entity Decorators</span>
+          <span class="chip">Typed Query Pipeline</span>
+        </div>
+      </article>
+      <article class="panel">
+        <h3>Developer Experience</h3>
+        <p>Optimized for iteration speed with predictable patterns and clean defaults—ideal for rapid prototyping and long-term maintainability.</p>
+        <div class="chipset">
+          <span class="chip">Quick Bootstrapping</span>
+          <span class="chip">Readable Structure</span>
+          <span class="chip">Low Cognitive Load</span>
+        </div>
+      </article>
+      <article class="panel">
+        <h3>Demo Design Goals</h3>
+        <p>Balanced color contrast for dark/light themes, resilient typography, and smooth but restrained motion for a credible senior-level presentation quality.</p>
+        <div class="chipset">
+          <span class="chip">Accessible Contrast</span>
+          <span class="chip">Motion Discipline</span>
+          <span class="chip">Performance Aware</span>
+        </div>
+      </article>
+    </section>
+
+    <footer>
+      <div>© 2020 Emmanuel Esomonu</div>
+      <div>For demonstration purposes only.</div>
+      <a class="source-link" href="https://github.com/emmanueleso/typeorm-json-api" target="_blank" rel="noopener noreferrer">
+        View Source Code
+        <svg class="github-icon" viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M8 .2a8 8 0 0 0-2.53 15.6c.4.07.55-.17.55-.38v-1.49c-2.24.49-2.71-1.08-2.71-1.08-.36-.93-.9-1.17-.9-1.17-.73-.5.05-.49.05-.49.8.05 1.22.83 1.22.83.72 1.22 1.87.87 2.32.66.07-.52.28-.87.5-1.07-1.79-.2-3.67-.9-3.67-3.98 0-.88.31-1.6.82-2.16-.08-.2-.36-1.03.08-2.14 0 0 .67-.22 2.2.82A7.7 7.7 0 0 1 8 4.34c.68 0 1.36.09 2 .26 1.52-1.04 2.2-.82 2.2-.82.44 1.11.16 1.94.08 2.14.51.56.82 1.28.82 2.16 0 3.09-1.89 3.78-3.69 3.98.29.25.54.73.54 1.47v2.18c0 .21.14.45.55.38A8 8 0 0 0 8 .2z"/>
+        </svg>
+      </a>
+    </footer>
+  </main>
+
+  <script>
+    const root = document.documentElement;
+    const toggleButton = document.getElementById('themeToggle');
+    const themeText = document.getElementById('themeText');
+    const themeIcon = document.getElementById('themeIcon');
+
+    const savedTheme = localStorage.getItem('demo-theme');
+    if (savedTheme) {
+      root.setAttribute('data-theme', savedTheme);
+      updateThemeUI(savedTheme);
+    } else {
+      updateThemeUI('dark');
+    }
+
+    toggleButton.addEventListener('click', () => {
+      const current = root.getAttribute('data-theme') || 'dark';
+      const nextTheme = current === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', nextTheme);
+      localStorage.setItem('demo-theme', nextTheme);
+      updateThemeUI(nextTheme);
+    });
+
+    function updateThemeUI(theme) {
+      if (theme === 'light') {
+        themeText.textContent = 'Light Mode';
+        themeIcon.textContent = '☀️';
+      } else {
+        themeText.textContent = 'Dark Mode';
+        themeIcon.textContent = '🌙';
+      }
+    }
+  </script>
+</body>
+</html>
